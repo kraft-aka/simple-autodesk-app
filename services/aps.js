@@ -86,3 +86,37 @@ service.uploadObjects = async (objectName, filePath) => {
     const obj = await ossClient.upload(APS_BUCKET, objectName, filePath, access_token);
     return obj;
 }
+
+service.translateObject = async (urn, rootFilename) => {
+    const { access_token } = await service.getInternalToken();
+    const job = await modelDerivativeClient.startJob(access_token, {
+        input: {
+            urn,
+            compressedUrn: !!rootFilename,
+            rootFilename,
+        },
+        output: {
+            formats: [{
+                views: [View._2d, View._3d],
+                type: Type.Svf
+            }]
+        }
+    })
+    return job.result;
+}
+
+service.getManifest = async (urn) => {
+    const { access_token } = service.getInternalToken();
+    try {
+        const manifest = await modelDerivativeClient.getManifest(access_token, urn);
+        return manifest;
+    } catch (err) {
+        if (err.axiosError.response.status === 404) {
+            return null;
+        } else {
+            throw err;
+        }
+    }
+}
+
+service.urnify = (id) => Buffer.from(id).toString('base64').replace(/=/g, '');
