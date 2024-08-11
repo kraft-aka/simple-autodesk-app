@@ -9,12 +9,36 @@ router.get('/api/models', async function (req, res, next) {
         const objects = await listObjects();
         res.json(objects.map(o => ({
             name: o.objectKey,
-            urn: urnify(o.objectId)
+            urn: urnify(o.objectId),
+            id: o.objectId,
         })));
+        console.log(objects)
     } catch (err) {
         next(err);
     }
 });
+
+// deletes one particular model 
+router.delete('/api/models/:id', async (req, res, next) => {
+    try {
+        const objToDelete = req.params.id;
+        const objects = await listObjects();
+
+        const objIdx = objects.findIndex(o => o.objectId === objToDelete);
+
+
+        if (objIdx === -1) {
+            return res.status(404).send({ msg: 'Model not found.' })
+        }
+
+        objects.splice(objIdx, 1);
+
+        res.status(200).send({msg: `Successfully deleted model, ${objToDelete}`})
+
+    } catch (err) {
+        res.status(400).send({ msg: 'Could not find the model.' })
+    }
+})
 
 router.get('/api/models/:urn/status', async function (req, res, next) {
     try {
