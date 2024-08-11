@@ -1,4 +1,4 @@
-import { initViewer, loadModel } from "./viewer";
+import { initViewer, loadModel } from "./viewer.js";
 
 initViewer(document.getElementById("preview")).then((viewer) => {
   const urn = window.location.hash?.substring(1);
@@ -6,7 +6,7 @@ initViewer(document.getElementById("preview")).then((viewer) => {
   setupModelUpload(viewer);
 });
 
-async function setupModelSelection(viewer, selectUrn) {
+async function setupModelSelection(viewer, selectedUrn) {
   const dropdown = document.getElementById("models");
   dropdown.innerHTML = "";
   try {
@@ -28,6 +28,7 @@ async function setupModelSelection(viewer, selectUrn) {
       onModelSelected(viewer, dropdown.value);
     }
   } catch (err) {
+    alert("Could not list models. See the console for more details.");
     console.error(err);
   }
 }
